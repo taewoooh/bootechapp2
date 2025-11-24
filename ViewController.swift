@@ -15,6 +15,7 @@ class SearchBarView: UIView {
         let tf = UITextField()
         tf.placeholder = "법정동, 아파트명 검색"
         tf.borderStyle = .none
+        tf.textColor = AppColors.edittextcolor1   // ← 텍스트 색상 설정
         tf.font = UIFont.systemFont(ofSize: 16)
         tf.translatesAutoresizingMaskIntoConstraints = false
         return tf
@@ -40,7 +41,7 @@ class SearchBarView: UIView {
     }
 
     private func setupUI() {
-        backgroundColor = UIColor(white: 0.95, alpha: 1)
+        backgroundColor = AppColors.editbackground
         layer.cornerRadius = 12
         layer.masksToBounds = true
 
