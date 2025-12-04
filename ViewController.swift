@@ -404,9 +404,10 @@ class ViewController: BaseViewController { //BaseViewController 에 화면 터�
     let infoView = TransactionInfoView()
     let recentView = RecentSearchView()   // 🔥 최근검색 뷰 추가
     
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+       
         view.backgroundColor = AppColors.mainBackground
         
         [searchBar, cardScroll, infoView, recentView].forEach {
@@ -495,6 +496,6 @@ class ViewController: BaseViewController { //BaseViewController 에 화면 터�
         
         
     }
-    
+
 }
 
