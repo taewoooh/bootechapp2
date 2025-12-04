@@ -1,8 +1,7 @@
-//
-//  BaseViewController.swift
-//  bootechapp
-//
-//  Created by 오태우 on 12/3/25.
-//
+import UIKit
 
-import Foundation
+class BaseViewController: UIViewController {
+//    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+//        self.view.endEditing(true)
+//    }
+}
