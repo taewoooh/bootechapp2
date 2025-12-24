@@ -4,8 +4,8 @@ import SwiftUI
 // 🔹 1. SearchBarView는 ViewController 밖에 따로 정의
 class SearchBarView: UIView , UITextFieldDelegate{
     
-    var onBeginEditing: (() -> Void)?
-    var onEndEditing: (() -> Void)?
+//    var onBeginEditing: (() -> Void)?
+//    var onEndEditing: (() -> Void)?
     var onTextChanged: ((String) -> Void)?   // 🔥 텍스트 변경 콜백 추가
     
     private let searchIcon: UIImageView = {
@@ -37,7 +37,8 @@ class SearchBarView: UIView , UITextFieldDelegate{
         iv.isUserInteractionEnabled = true
         return iv
     }()
-    
+ 
+
     private let clearHitArea: UIView = {
         let v = UIView()
         v.translatesAutoresizingMaskIntoConstraints = false
@@ -65,13 +66,13 @@ class SearchBarView: UIView , UITextFieldDelegate{
         textField.delegate = self
         setupUI()
     }
-    func textFieldDidBeginEditing(_ textField: UITextField) {
-        onBeginEditing?()
-    }
-
-    func textFieldDidEndEditing(_ textField: UITextField) {
-        onEndEditing?()
-    }
+//    func textFieldDidBeginEditing(_ textField: UITextField) {
+//        onBeginEditing?()
+//    }
+//
+//    func textFieldDidEndEditing(_ textField: UITextField) {
+//        onEndEditing?()
+//    }
 
     private func setupUI() {
         backgroundColor = AppColors.editbackground
@@ -335,6 +336,9 @@ class RecentSearchView: UIView {
         btn.translatesAutoresizingMaskIntoConstraints = false
         return btn
     }()
+   
+    
+  
     
     private let listContainer: UIStackView = {
         let st = UIStackView()
@@ -362,6 +366,7 @@ class RecentSearchView: UIView {
         addSubview(titleLabel)
         addSubview(deleteAllButton)
         addSubview(listContainer)
+
         
         NSLayoutConstraint.activate([
             // 제목
@@ -375,8 +380,12 @@ class RecentSearchView: UIView {
             // 리스트 영역
             listContainer.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 20),
             listContainer.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
-            listContainer.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16)
-        ])
+            listContainer.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
+            
+         
+           ])
+
+
     }
     
     // 👇 최근검색을 추가하는 함수
@@ -395,37 +404,44 @@ class RecentSearchView: UIView {
 
 
 
-// 🔹 2. ViewController는 이렇게 그대로 두면 됨
-class ViewController: BaseViewController { //BaseViewController 에 화면 터치시 키보드 내려가는 기능 재활용
-    
-    // 🔹 다른 뷰처럼 property로 꺼내놓기
+class ViewController: BaseViewController {
+    override var recentSearchView: UIView? { recentView }   // 🔥 BaseVC에 연결
     let searchBar = SearchBarView()
     let cardScroll = HorizontalCardScrollView()
     let infoView = TransactionInfoView()
-    let recentView = RecentSearchView()   // 🔥 최근검색 뷰 추가
-    
-    
+    let recentView = RecentSearchView()
+
     override func viewDidLoad() {
         super.viewDidLoad()
-       
+
         view.backgroundColor = AppColors.mainBackground
-        
+
+        // 🔥 이 화면에서만 키보드 백버튼 활성화
+        enableKeyboardBackButton = false
+
+        // UI 세팅
         [searchBar, cardScroll, infoView, recentView].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
             view.addSubview($0)
         }
+
+        recentView.isHidden = true   // 초기 숨김
+
         
-        view.addSubview(searchBar)
-        view.addSubview(cardScroll)
-        view.addSubview(infoView)
-        view.addSubview(recentView)
+        // 🔥 SearchBar 텍스트 변화 예외 규칙
+        searchBar.onTextChanged = { [weak self] text in
+            guard let self = self else { return }
+
+            if text.isEmpty {
+                // 텍스트 없음 → 최근검색 반드시 보이기
+                self.recentSearchView?.isHidden = false
+            } else {
+                // 텍스트 있음 → 최근검색 반드시 숨기기
+                self.recentSearchView?.isHidden = true
+            }
+        }
         
-        recentView.isHidden = true  // 🔥 최근검색은 처음엔 숨겨둔다
-        
-        
-        
-        
-        
+        // 카드 세팅
         cardScroll.setItems([
             ("일별실거래(매매)", UIImage(named : "daydown")),
             ("아파트찾기", UIImage(named: "searchdata")),
@@ -440,62 +456,36 @@ class ViewController: BaseViewController { //BaseViewController 에 화면 터�
             ("알림 설정", UIImage(named: "noti")),
             ("앱 정보", UIImage(named: "appinfor"))
         ])
-        
+
+        // 레이아웃
         NSLayoutConstraint.activate([
             searchBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
             searchBar.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             searchBar.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             searchBar.heightAnchor.constraint(equalToConstant: 50),
-            
+
             cardScroll.topAnchor.constraint(equalTo: searchBar.bottomAnchor, constant: 20),
             cardScroll.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             cardScroll.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             cardScroll.heightAnchor.constraint(equalToConstant: Dimens.Height.HeightButton),
-            
-            
-            infoView.topAnchor.constraint(equalTo: cardScroll.bottomAnchor, constant: 9),// cardscroll 하고 위아래 간격
-            
+
+            infoView.topAnchor.constraint(equalTo: cardScroll.bottomAnchor, constant: 9),
             infoView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             infoView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             infoView.heightAnchor.constraint(equalToConstant: 80),
-            
-            // 🔥 최근검색 뷰는 검색창 바로 아래에 풀스크린으로 붙인다
+
             recentView.topAnchor.constraint(equalTo: searchBar.bottomAnchor, constant: 10),
             recentView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             recentView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             recentView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-            
-            
         ])
-        infoView.setData(   // ❌ 여기가 문제. activate 안에 있으면 안 됨.
-            dateString: "20251203",
-            totalCount: 1890,
-            highPriceCount: 114,
-            highPriceRate: 6.0,
-            recoveryRate: 80.7
-        )
-        
-        searchBar.onBeginEditing = { [weak self] in
-            guard let self = self else { return }
-            self.recentView.isHidden = false
-        }
-        
-        searchBar.onEndEditing = { [weak self] in
-            guard let self = self else { return }
-            self.recentView.isHidden = true
-        }
-        searchBar.onTextChanged = { [weak self] text in
-            guard let self = self else { return }
-            
-            if text.count > 0 {
-                self.recentView.isHidden = true     // 🔥 텍스트 있을 때 → 최근검색 숨김
-            } else {
-                self.recentView.isHidden = false    // 🔥 텍스트 없을 때 → 최근검색 표시
-            }
-        }
-        
-        
+
+ 
     }
 
-}
+    // 🔥 백버튼 눌렀을 때 기능 덮어쓰기
 
+    override func backAction() {
+        view.endEditing(true)       // 키보드 내려감 → recentView도 자동 숨김
+    }
+}
