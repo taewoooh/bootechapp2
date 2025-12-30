@@ -392,7 +392,7 @@ class RecentSearchView: UIView {
         else { return }
 
         // 🔥 여기서 "원하는 위치" 조정
-        closeButtonBottomConstraint?.constant = -frame.height - 16
+        closeButtonBottomConstraint?.constant = -frame.height - 6
     }
 
     
