@@ -4,8 +4,8 @@ import SwiftUI
 // 🔹 1. SearchBarView는 ViewController 밖에 따로 정의
 class SearchBarView: UIView , UITextFieldDelegate{
     
-//    var onBeginEditing: (() -> Void)?
-//    var onEndEditing: (() -> Void)?
+    //    var onBeginEditing: (() -> Void)?
+    //    var onEndEditing: (() -> Void)?
     var onTextChanged: ((String) -> Void)?   // 🔥 텍스트 변경 콜백 추가
     
     private let searchIcon: UIImageView = {
@@ -37,15 +37,15 @@ class SearchBarView: UIView , UITextFieldDelegate{
         iv.isUserInteractionEnabled = true
         return iv
     }()
- 
-
+    
+    
     private let clearHitArea: UIView = {
         let v = UIView()
         v.translatesAutoresizingMaskIntoConstraints = false
         v.isUserInteractionEnabled = true
         return v
     }()
-
+    
     private let listsetUp: UIImageView = {
         let imageView = UIImageView()
         // imageView.image = UIImage(systemName: "list") // 새로고침
@@ -66,13 +66,6 @@ class SearchBarView: UIView , UITextFieldDelegate{
         textField.delegate = self
         setupUI()
     }
-//    func textFieldDidBeginEditing(_ textField: UITextField) {
-//        onBeginEditing?()
-//    }
-//
-//    func textFieldDidEndEditing(_ textField: UITextField) {
-//        onEndEditing?()
-//    }
 
     private func setupUI() {
         backgroundColor = AppColors.editbackground
@@ -87,20 +80,20 @@ class SearchBarView: UIView , UITextFieldDelegate{
         
         let tap = UITapGestureRecognizer(target: self, action: #selector(clearText))
         clearHitArea.addGestureRecognizer(tap)
-
+        
         
         NSLayoutConstraint.activate([
             searchIcon.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 12),
             searchIcon.centerYAnchor.constraint(equalTo: centerYAnchor),
             searchIcon.widthAnchor.constraint(equalToConstant: 22),
             searchIcon.heightAnchor.constraint(equalToConstant: 22),
-
+            
             textField.leadingAnchor.constraint(equalTo: searchIcon.trailingAnchor, constant: 8),
             textField.centerYAnchor.constraint(equalTo: centerYAnchor),
             
             // 🔥 텍스트필드 오른쪽은 clearButton 왼쪽
             textField.trailingAnchor.constraint(equalTo: clearButton.leadingAnchor, constant: -8),
-
+            
             clearHitArea.centerYAnchor.constraint(equalTo: centerYAnchor),
             clearHitArea.widthAnchor.constraint(equalToConstant: 35),
             clearHitArea.heightAnchor.constraint(equalToConstant: 35),
@@ -119,9 +112,9 @@ class SearchBarView: UIView , UITextFieldDelegate{
             listsetUp.widthAnchor.constraint(equalToConstant: 22),
             listsetUp.heightAnchor.constraint(equalToConstant: 22)
         ])
-
+        
         textField.addTarget(self, action: #selector(textDidChange), for: .editingChanged)
-
+        
     }
     @objc private func clearText() {
         textField.text = ""
@@ -316,8 +309,11 @@ class TransactionInfoView: UIView {
         extraLabel.text = "( 신고가율 : \(String(format: "%.1f", highPriceRate))% )"
         extraLabel2.text = "( 최고가대비 회복률 : \(String(format: "%.1f", recoveryRate))% )"
     }
-}//전국/등록건수 : 1890건 .. 신고가율:6.0% 등등
+}//전국/등록건수 : 1890건 .. 신고가율:6.0% 등등ㅋ
 class RecentSearchView: UIView {
+    
+    private var closeButtonBottomConstraint: NSLayoutConstraint?
+    
     
     private let titleLabel: UILabel = {
         let lb = UILabel()
@@ -328,6 +324,32 @@ class RecentSearchView: UIView {
         return lb
     }()
     
+    
+    
+    private let closeButton: UIButton = {
+        let btn = UIButton(type: .system)
+        
+        let config = UIImage.SymbolConfiguration(pointSize: 26, weight: .regular)
+        btn.setImage(UIImage(named: "deletex")?.withConfiguration(config), for: .normal)
+        
+        btn.tintColor = .darkGray
+        btn.backgroundColor = .white
+        
+        // 🔥 반드시 버튼 크기의 절반
+        btn.layer.cornerRadius = 26
+        btn.layer.masksToBounds = false
+        
+        // 🔥 그림자는 작고 또렷하게
+        btn.layer.shadowColor = UIColor.black.cgColor
+        btn.layer.shadowOpacity = 0.15
+        btn.layer.shadowRadius = 8
+        btn.layer.shadowOffset = CGSize(width: 0, height: 4)
+        
+        btn.translatesAutoresizingMaskIntoConstraints = false
+        return btn
+    }()
+    
+    
     private let deleteAllButton: UIButton = {
         let btn = UIButton()
         btn.setTitle("전부삭제", for: .normal)
@@ -336,9 +358,9 @@ class RecentSearchView: UIView {
         btn.translatesAutoresizingMaskIntoConstraints = false
         return btn
     }()
-   
     
-  
+    
+    
     
     private let listContainer: UIStackView = {
         let st = UIStackView()
@@ -353,12 +375,51 @@ class RecentSearchView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupUI()
+        registerKeyboardNotifications()
+        
     }
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         setupUI()
+        registerKeyboardNotifications()
+        
     }
+    @objc private func keyboardWillShow(_ noti: Notification) {
+        guard
+            let info = noti.userInfo,
+            let frame = info[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect
+        else { return }
+
+        // 🔥 여기서 "원하는 위치" 조정
+        closeButtonBottomConstraint?.constant = -frame.height - 16
+    }
+
+    
+    @objc private func keyboardWillHide(_ noti: Notification) {
+        closeButtonBottomConstraint?.constant = -20
+        
+        UIView.animate(withDuration: 0.25) {
+            self.layoutIfNeeded()
+        }
+    }
+    
+    private func registerKeyboardNotifications() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardWillShow),
+            name: UIResponder.keyboardWillShowNotification,
+            object: nil
+        )
+        
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardWillHide),
+            name: UIResponder.keyboardWillHideNotification,
+            object: nil
+        )
+    }
+    
     
     private func setupUI() {
         backgroundColor = .white
@@ -366,7 +427,13 @@ class RecentSearchView: UIView {
         addSubview(titleLabel)
         addSubview(deleteAllButton)
         addSubview(listContainer)
-
+        addSubview(closeButton)
+        
+        // 🔥 bottom constraint는 변수로 들고 있어야 함
+        closeButtonBottomConstraint = closeButton.bottomAnchor.constraint(
+            equalTo: safeAreaLayoutGuide.bottomAnchor,
+            constant: -20
+        )
         
         NSLayoutConstraint.activate([
             // 제목
@@ -382,10 +449,14 @@ class RecentSearchView: UIView {
             listContainer.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
             listContainer.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
             
-         
-           ])
-
-
+            closeButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
+            closeButtonBottomConstraint!,
+            closeButton.widthAnchor.constraint(equalToConstant: 52),
+            closeButton.heightAnchor.constraint(equalToConstant: 52)
+            
+        ])
+        
+        
     }
     
     // 👇 최근검색을 추가하는 함수
@@ -410,28 +481,28 @@ class ViewController: BaseViewController {
     let cardScroll = HorizontalCardScrollView()
     let infoView = TransactionInfoView()
     let recentView = RecentSearchView()
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         view.backgroundColor = AppColors.mainBackground
-
+        
         // 🔥 이 화면에서만 키보드 백버튼 활성화
         enableKeyboardBackButton = false
-
+        
         // UI 세팅
         [searchBar, cardScroll, infoView, recentView].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
             view.addSubview($0)
         }
-
+        
         recentView.isHidden = true   // 초기 숨김
-
+        
         
         // 🔥 SearchBar 텍스트 변화 예외 규칙
         searchBar.onTextChanged = { [weak self] text in
             guard let self = self else { return }
-
+            
             if text.isEmpty {
                 // 텍스트 없음 → 최근검색 반드시 보이기
                 self.recentSearchView?.isHidden = false
@@ -456,35 +527,35 @@ class ViewController: BaseViewController {
             ("알림 설정", UIImage(named: "noti")),
             ("앱 정보", UIImage(named: "appinfor"))
         ])
-
+        
         // 레이아웃
         NSLayoutConstraint.activate([
             searchBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
             searchBar.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             searchBar.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             searchBar.heightAnchor.constraint(equalToConstant: 50),
-
+            
             cardScroll.topAnchor.constraint(equalTo: searchBar.bottomAnchor, constant: 20),
             cardScroll.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             cardScroll.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             cardScroll.heightAnchor.constraint(equalToConstant: Dimens.Height.HeightButton),
-
+            
             infoView.topAnchor.constraint(equalTo: cardScroll.bottomAnchor, constant: 9),
             infoView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             infoView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             infoView.heightAnchor.constraint(equalToConstant: 80),
-
+            
             recentView.topAnchor.constraint(equalTo: searchBar.bottomAnchor, constant: 10),
             recentView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             recentView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             recentView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
-
- 
+        
+        
     }
-
+    
     // 🔥 백버튼 눌렀을 때 기능 덮어쓰기
-
+    
     override func backAction() {
         view.endEditing(true)       // 키보드 내려감 → recentView도 자동 숨김
     }
