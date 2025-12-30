@@ -420,7 +420,14 @@ class RecentSearchView: UIView {
         )
     }
     
-    
+    @objc private func didTapCloseButton() { //최신검색 노출시 x 버튼 눌렀을때
+        // 예시 1: 키보드 내리기
+        window?.endEditing(true)   // 🔥 키보드 확실히 내림
+
+        // 예시 2: 최근검색 뷰 숨기기
+        isHidden = true
+    }
+
     private func setupUI() {
         backgroundColor = .white
         
@@ -434,7 +441,12 @@ class RecentSearchView: UIView {
             equalTo: safeAreaLayoutGuide.bottomAnchor,
             constant: -20
         )
-        
+        closeButton.addTarget(
+            self,
+            action: #selector(didTapCloseButton),
+            for: .touchUpInside
+        )
+
         NSLayoutConstraint.activate([
             // 제목
             titleLabel.topAnchor.constraint(equalTo: topAnchor, constant: 20),
