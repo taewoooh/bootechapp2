@@ -4,8 +4,8 @@ import SwiftUI
 // 🔹 1. SearchBarView는 ViewController 밖에 따로 정의
 class SearchBarView: UIView , UITextFieldDelegate{
     
-    //    var onBeginEditing: (() -> Void)?
-    //    var onEndEditing: (() -> Void)?
+    var onClearTapped: ((Bool) -> Void)?
+    
     var onTextChanged: ((String) -> Void)?   // 🔥 텍스트 변경 콜백 추가
     
     private let searchIcon: UIImageView = {
@@ -119,8 +119,13 @@ class SearchBarView: UIView , UITextFieldDelegate{
     @objc private func clearText() {
         textField.text = ""
         clearButton.isHidden = true
-        onTextChanged?("")  // 텍스트 변경 콜백 실행
+
+        let keyboardVisible = textField.isFirstResponder
+
+        onTextChanged?("")
+        onClearTapped?(keyboardVisible)
     }
+
     
     @objc private func textDidChange() {
         let text = textField.text ?? ""
@@ -312,8 +317,7 @@ class TransactionInfoView: UIView {
 }//전국/등록건수 : 1890건 .. 신고가율:6.0% 등등ㅋ
 class RecentSearchView: UIView {
     
-    private var closeButtonBottomConstraint: NSLayoutConstraint?
-    
+
     
     private let titleLabel: UILabel = {
         let lb = UILabel()
@@ -375,50 +379,19 @@ class RecentSearchView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupUI()
-        registerKeyboardNotifications()
+    
         
     }
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         setupUI()
-        registerKeyboardNotifications()
+      
         
-    }
-    @objc private func keyboardWillShow(_ noti: Notification) {
-        guard
-            let info = noti.userInfo,
-            let frame = info[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect
-        else { return }
-
-        // 🔥 여기서 "원하는 위치" 조정
-        closeButtonBottomConstraint?.constant = -frame.height - 6
     }
 
     
-    @objc private func keyboardWillHide(_ noti: Notification) {
-        closeButtonBottomConstraint?.constant = -20
-        
-        UIView.animate(withDuration: 0.25) {
-            self.layoutIfNeeded()
-        }
-    }
-    
-    private func registerKeyboardNotifications() {
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(keyboardWillShow),
-            name: UIResponder.keyboardWillShowNotification,
-            object: nil
-        )
-        
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(keyboardWillHide),
-            name: UIResponder.keyboardWillHideNotification,
-            object: nil
-        )
-    }
+
     
     @objc private func didTapCloseButton() { //최신검색 노출시 x 버튼 눌렀을때
         // 예시 1: 키보드 내리기
@@ -434,19 +407,9 @@ class RecentSearchView: UIView {
         addSubview(titleLabel)
         addSubview(deleteAllButton)
         addSubview(listContainer)
-        addSubview(closeButton)
-        
-        // 🔥 bottom constraint는 변수로 들고 있어야 함
-        closeButtonBottomConstraint = closeButton.bottomAnchor.constraint(
-            equalTo: safeAreaLayoutGuide.bottomAnchor,
-            constant: -20
-        )
-        closeButton.addTarget(
-            self,
-            action: #selector(didTapCloseButton),
-            for: .touchUpInside
-        )
+      
 
+   
         NSLayoutConstraint.activate([
             // 제목
             titleLabel.topAnchor.constraint(equalTo: topAnchor, constant: 20),
@@ -459,12 +422,7 @@ class RecentSearchView: UIView {
             // 리스트 영역
             listContainer.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 20),
             listContainer.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
-            listContainer.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
-            
-            closeButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
-            closeButtonBottomConstraint!,
-            closeButton.widthAnchor.constraint(equalToConstant: 52),
-            closeButton.heightAnchor.constraint(equalToConstant: 52)
+            listContainer.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16)
             
         ])
         
@@ -523,7 +481,16 @@ class ViewController: BaseViewController {
                 self.recentSearchView?.isHidden = true
             }
         }
-        
+        searchBar.onClearTapped = { [weak self] keyboardVisible in
+            guard let self = self else { return }
+
+            self.recentView.isHidden = !keyboardVisible
+        }
+
+        // 🔥 화면 탭 시 키보드 내리기
+        let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        tap.cancelsTouchesInView = false
+        view.addGestureRecognizer(tap)
         // 카드 세팅
         cardScroll.setItems([
             ("일별실거래(매매)", UIImage(named : "daydown")),
@@ -571,4 +538,9 @@ class ViewController: BaseViewController {
     override func backAction() {
         view.endEditing(true)       // 키보드 내려감 → recentView도 자동 숨김
     }
+    
+    @objc private func dismissKeyboard() {
+        view.endEditing(true)
+    }
+
 }
