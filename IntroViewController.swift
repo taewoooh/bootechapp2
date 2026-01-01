@@ -1,98 +1,45 @@
 import UIKit
 
-class RecentSearchView: UIView {
-    
+class IntroViewController: UIViewController {
 
-    
-    private let titleLabel: UILabel = {
-        let lb = UILabel()
-        lb.text = "최근검색"
-        lb.font = UIFont.boldSystemFont(ofSize: 18)
-        lb.textColor = .black
-        lb.translatesAutoresizingMaskIntoConstraints = false
-        return lb
-    }()
-    
-    
+    override func viewDidLoad() {
+        super.viewDidLoad()
 
-    
-    
-    private let deleteAllButton: UIButton = {
-        let btn = UIButton()
-        btn.setTitle("전부삭제", for: .normal)
-        btn.setTitleColor(.systemBlue, for: .normal)
-        btn.titleLabel?.font = UIFont.systemFont(ofSize: 14)
-        btn.translatesAutoresizingMaskIntoConstraints = false
-        return btn
-    }()
-    
-    
-    
-    
-    private let listContainer: UIStackView = {
-        let st = UIStackView()
-        st.axis = .vertical
-        st.spacing = 10
-        st.alignment = .leading
-        st.translatesAutoresizingMaskIntoConstraints = false
-        return st
-    }()
-    
-    
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        setupUI()
-    
-        
-    }
-    
-    required init?(coder: NSCoder) {
-        super.init(coder: coder)
-        setupUI()
-      
-        
-    }
+        view.backgroundColor = .white
 
-    
+        // 🔥 중앙 로고 이미지
+        let imageView = UIImageView()
+        imageView.image = UIImage(named: "illustration4")  // 파일명 그대로
+        imageView.contentMode = .scaleAspectFit            // 비율 유지 (중요)
+        imageView.translatesAutoresizingMaskIntoConstraints = false
 
-    
+        view.addSubview(imageView)
 
-
-    private func setupUI() {
-        backgroundColor = .white
-        
-        addSubview(titleLabel)
-        addSubview(deleteAllButton)
-        addSubview(listContainer)
-      
-
-   
         NSLayoutConstraint.activate([
-            // 제목
-            titleLabel.topAnchor.constraint(equalTo: topAnchor, constant: 20),
-            titleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
-            
-            // 삭제버튼
-            deleteAllButton.centerYAnchor.constraint(equalTo: titleLabel.centerYAnchor),
-            deleteAllButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
-            
-            // 리스트 영역
-            listContainer.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 20),
-            listContainer.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
-            listContainer.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16)
-            
+            imageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            imageView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            imageView.widthAnchor.constraint(equalToConstant: 400),   // 필요하면 조절
+            imageView.heightAnchor.constraint(equalToConstant: 400)
         ])
-        
-        
-    }
-    
-    // 👇 최근검색을 추가하는 함수
-    func addRecentItem(_ text: String) {
-        let lb = UILabel()
-        lb.text = text
-        lb.font = UIFont.systemFont(ofSize: 15)
-        lb.textColor = .darkGray
-        listContainer.addArrangedSubview(lb)
-    }
-} //  최근검색 페이지 (SearchBar 터치 시 보여지는 레이어)
 
+        // 🔥 2초 후 메인 화면으로 이동
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            self.goToMain()
+        }
+    }
+
+    private func goToMain() {
+        let mainVC = ViewController()   // 네 메인 페이지
+
+        // NavigationController 생성
+        let nav = UINavigationController(rootViewController: mainVC)
+
+        // NavigationBar 숨기고 싶으면 (선택)
+        nav.setNavigationBarHidden(true, animated: false)
+
+        // root 변경 (인트로는 스택에서 제거)
+        if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
+            sceneDelegate.window?.rootViewController = nav
+        }
+    }
+}
