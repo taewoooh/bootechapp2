@@ -41,26 +41,32 @@ class ViewController: UIViewController {
             object: nil
         )
         
-        searchBar.onBeginEditing = { [weak self] in
-            guard let self = self else { return }
-
-            // 🔥 텍스트필드 터치 시
-            // (아직 입력 안 했으면)
-            self.recentView.isHidden = false
-        }
-
+        // 🔥 검색어 입력 변화 감지 (Android afterTextChanged 역할)
+        // - 텍스트 길이가 0보다 크면 → 최신검색뷰 숨김
+        // - 텍스트 길이가 0이고 + 키보드가 올라와 있으면 → 최신검색뷰 표시
+        // - 키보드가 내려가 있으면 → 최신검색뷰 절대 표시하지 않음
         searchBar.onTextChanged = { [weak self] text in
             guard let self = self else { return }
 
+            // 🔑 키보드가 올라와 있는지 체크
+            // (searchBar 내부 textField가 firstResponder이면 키보드 노출 상태)
+            let isKeyboardVisible = self.searchBar.isFirstResponder
+
             if text.count > 0 {
-                // 🔥 글자 하나라도 입력되면 → 숨김
+                // 🔥 입력 중 → 최신검색뷰 비활성화
                 self.recentView.isHidden = true
             } else {
-                // 🔥 다시 비면 → 노출
-                self.recentView.isHidden = false
+                if isKeyboardVisible {
+                    // 🔥 텍스트 비어있고 + 키보드 노출 중 → 최신검색뷰 활성화
+                    self.recentView.isHidden = false
+                } else {
+                    // 🔥 키보드 내려가 있으면 → 최신검색뷰 비활성화 유지
+                    self.recentView.isHidden = true
+                }
             }
         }
-        
+
+
         cardScroll.setItems([
             ("일별실거래(매매)", UIImage(named : "daydown")),
             ("아파트찾기", UIImage(named: "searchdata")),
@@ -76,7 +82,7 @@ class ViewController: UIViewController {
             ("앱 정보", UIImage(named: "appinfor"))
         ])
         
-        searchBar.translatesAutoresizingMaskIntoConstraints = false
+        
         NSLayoutConstraint.activate([
             searchBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
             searchBar.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
@@ -118,16 +124,19 @@ class ViewController: UIViewController {
     }
     @objc private func keyboardWillShow(_ notification: Notification) {
         print("키보드 올라옴")
+        recentView.isHidden = false
     }
 
     @objc private func keyboardWillHide(_ notification: Notification) {
         print("키보드 내려감")
         recentView.isHidden = true
-        
     }
 
     @objc private func dismissKeyboard() {
         view.endEditing(true)
     }
-    
+ 
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
 }
