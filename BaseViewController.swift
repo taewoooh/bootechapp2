@@ -1,45 +1,61 @@
 import UIKit
 
-class IntroViewController: UIViewController {
+class BaseViewController: UIViewController {
+    
+    /// 🔹 키보드 상태에 따라 표시/숨김 처리할 뷰
+      weak var keyboardResponsiveView: UIView?
+    
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        view.backgroundColor = .white
-
-        // 🔥 중앙 로고 이미지
-        let imageView = UIImageView()
-        imageView.image = UIImage(named: "illustration4")  // 파일명 그대로
-        imageView.contentMode = .scaleAspectFit            // 비율 유지 (중요)
-        imageView.translatesAutoresizingMaskIntoConstraints = false
-
-        view.addSubview(imageView)
-
-        NSLayoutConstraint.activate([
-            imageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            imageView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            imageView.widthAnchor.constraint(equalToConstant: 400),   // 필요하면 조절
-            imageView.heightAnchor.constraint(equalToConstant: 400)
-        ])
-
-        // 🔥 2초 후 메인 화면으로 이동
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-            self.goToMain()
-        }
+        setupDismissKeyboardOnTap()
+        registerKeyboardNotifications()
+        
     }
 
-    private func goToMain() {
-        let mainVC = ViewController()   // 네 메인 페이지
+    /// 🔹 키보드 노출/숨김 Notification 등록
+    private func registerKeyboardNotifications() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardWillShow),
+            name: UIResponder.keyboardWillShowNotification,
+            object: nil
+        )
 
-        // NavigationController 생성
-        let nav = UINavigationController(rootViewController: mainVC)
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardWillHide),
+            name: UIResponder.keyboardWillHideNotification,
+            object: nil
+        )
+    }
+    
+    /// 🔹 키보드 올라올 때
+     @objc private func keyboardWillShow(_ notification: Notification) {
+         keyboardResponsiveView?.isHidden = false
+     }
 
-        // NavigationBar 숨기고 싶으면 (선택)
-        nav.setNavigationBarHidden(true, animated: false)
+     /// 🔹 키보드 내려갈 때
+     @objc private func keyboardWillHide(_ notification: Notification) {
+         keyboardResponsiveView?.isHidden = true
+     }
 
-        // root 변경 (인트로는 스택에서 제거)
-        if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
-            sceneDelegate.window?.rootViewController = nav
-        }
+     deinit {
+         NotificationCenter.default.removeObserver(self)
+     }
+    
+    /// 🔹 화면 탭 시 키보드 내리기 공통 기능
+    private func setupDismissKeyboardOnTap() {
+        let tap = UITapGestureRecognizer(
+            target: self,
+            action: #selector(dismissKeyboard)
+        )
+        tap.cancelsTouchesInView = false
+        view.addGestureRecognizer(tap)
+    }
+
+    /// 🔹 키보드 숨기기
+    @objc func dismissKeyboard() {
+        view.endEditing(true)
     }
 }

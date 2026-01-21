@@ -9,7 +9,9 @@ class SearchBarView1: UIView , UITextFieldDelegate{
     var onBeginEditing: (() -> Void)?
     
     
-    
+    // 🔹 외부에서 주입받는 최신검색뷰
+    weak var recentSearchView: UIView?
+
     
     // 🔑 키보드가 올라와 있는지 여부
     var isKeyboardVisible: Bool {
@@ -155,11 +157,21 @@ class SearchBarView1: UIView , UITextFieldDelegate{
         onClearTapped?(keyboardVisible)
     }
     
-    
     @objc private func textDidChange() {
         let text = textField.text ?? ""
-        clearButton.isHidden = text.isEmpty   // 🔥 text 길이에 따라 X 버튼 show/hide
+        clearButton.isHidden = text.isEmpty
         onTextChanged?(text)
+
+        // 🔑 텍스트가 비어있는지 (nil, 공백 포함)
+        let isTextEmpty = text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+
+        // 🔥 최신검색뷰 활성 / 비활성 컨셉
+        if isKeyboardVisible && isTextEmpty {
+            recentSearchView?.isHidden = false
+        } else {
+            recentSearchView?.isHidden = true
+        }
     }
+
     
 } //상단 검색 툴바 (법정동,아파
