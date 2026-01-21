@@ -9,6 +9,13 @@ class SearchBarView1: UIView , UITextFieldDelegate{
     var onBeginEditing: (() -> Void)?
     
     
+    
+    
+    // 🔑 키보드가 올라와 있는지 여부
+    var isKeyboardVisible: Bool {
+        return textField.isFirstResponder
+    }
+    
     private let searchIcon: UIImageView = {
         let imageView = UIImageView()
         imageView.image = UIImage(systemName: "magnifyingglass") // 돋보기
