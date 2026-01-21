@@ -3,6 +3,7 @@ import UIKit
 class RecentSearchView: UIView {
     
 
+    private var items: [String] = []
     
     private let titleLabel: UILabel = {
         let lb = UILabel()
@@ -14,8 +15,21 @@ class RecentSearchView: UIView {
     }()
     
     
+    func update(list: [String]) {
 
-    
+        // 1️⃣ 기존에 그려져 있던 최신검색 전부 제거
+        listContainer.arrangedSubviews.forEach {
+            listContainer.removeArrangedSubview($0)
+            $0.removeFromSuperview()
+        }
+
+        // 2️⃣ 최신순(내림차순) 리스트 다시 그리기
+        for text in list {
+            addRecentItem(text)
+        }
+    }
+
+
     
     private let deleteAllButton: UIButton = {
         let btn = UIButton()

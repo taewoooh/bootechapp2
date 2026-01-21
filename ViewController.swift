@@ -37,7 +37,17 @@ class ViewController: BaseViewController {
         }
         
        
+        // 🔥 검색바 포커스(터치) 시
+        searchBar.onBeginEditing = { [weak self] in
+            guard let self = self else { return }
 
+            // ✅ 최신검색뷰가 보일 타이밍 = 무조건 리스트 로드
+            let list = RecentSearchStorage.load()
+            self.recentView.update(list: list)
+
+            // (이미 노출 로직이 있다면 이 줄은 없어도 됨)
+            self.recentView.isHidden = false
+        }
    
         // 🔹 상단 카드 메뉴 데이터 설정
         cardScroll.setItems([
@@ -111,7 +121,20 @@ class ViewController: BaseViewController {
         // 🔹 검색바 placeholder 설정
         searchBar.setPlaceholder("법정동, 아파트명 검색")
     }
+    override func currentSearchText() -> String? {
+        let text = searchBar.text
+        print("🟦 currentSearchText =", text)
+        return text
+    }
     
+    override func reloadRecentSearch() {
+        let list = RecentSearchStorage.load()
+        print("🟣 reloadRecentSearch =", list)
+        recentView.update(list: list)
+    }
+
+    
+
   
 
 }

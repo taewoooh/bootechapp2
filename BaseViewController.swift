@@ -35,11 +35,24 @@ class BaseViewController: UIViewController {
          keyboardResponsiveView?.isHidden = false
      }
 
-     /// 🔹 키보드 내려갈 때
-     @objc private func keyboardWillHide(_ notification: Notification) {
-         keyboardResponsiveView?.isHidden = true
-     }
+    @objc private func keyboardWillHide(_ notification: Notification) {
+        print("🟥 keyboardWillHide CALLED")
+        guard let text = currentSearchText(),
+              !text.isEmpty else {
+            
+            print("🟥 text is nil or empty → return")
+            return }
 
+        RecentSearchStorage.save(text)
+       // reloadRecentSearch()
+
+    
+    }
+
+     // ⬇️ 자식 VC가 구현할 메서드
+     func currentSearchText() -> String? { nil }
+     func reloadRecentSearch() {}
+    
      deinit {
          NotificationCenter.default.removeObserver(self)
      }
@@ -57,5 +70,7 @@ class BaseViewController: UIViewController {
     /// 🔹 키보드 숨기기
     @objc func dismissKeyboard() {
         view.endEditing(true)
+        keyboardResponsiveView?.isHidden = true
+
     }
 }

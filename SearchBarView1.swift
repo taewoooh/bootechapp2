@@ -12,6 +12,13 @@ class SearchBarView1: UIView , UITextFieldDelegate{
     // 🔹 외부에서 주입받는 최신검색뷰
     weak var recentSearchView: UIView?
 
+
+
+    // 🔥 외부에서 검색어 가져오기용
+    var text: String {
+        return textField.text ?? ""
+    }
+    
     
     // 🔑 키보드가 올라와 있는지 여부
     var isKeyboardVisible: Bool {

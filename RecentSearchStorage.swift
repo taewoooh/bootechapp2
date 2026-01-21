@@ -1,61 +1,31 @@
-import UIKit
 
-class BaseViewController: UIViewController {
-    
-    /// 🔹 키보드 상태에 따라 표시/숨김 처리할 뷰
-      weak var keyboardResponsiveView: UIView?
-    
+import Foundation
 
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        setupDismissKeyboardOnTap()
-        registerKeyboardNotifications()
+
+
+final class RecentSearchStorage {
+
+    private static let key = "recent_search_list"
+
+    // 저장
+    static func save(_ text: String) {
+        var list = load()
+
+        // 중복 제거
+        list.removeAll { $0 == text }
+
+        // 최신 → 맨 위
+        list.insert(text, at: 0)
+
+        UserDefaults.standard.set(list, forKey: key)
+        
+        print("✅ [SAVE] recent_search_list =", list)
+
         
     }
 
-    /// 🔹 키보드 노출/숨김 Notification 등록
-    private func registerKeyboardNotifications() {
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(keyboardWillShow),
-            name: UIResponder.keyboardWillShowNotification,
-            object: nil
-        )
-
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(keyboardWillHide),
-            name: UIResponder.keyboardWillHideNotification,
-            object: nil
-        )
-    }
-    
-    /// 🔹 키보드 올라올 때
-     @objc private func keyboardWillShow(_ notification: Notification) {
-         keyboardResponsiveView?.isHidden = false
-     }
-
-     /// 🔹 키보드 내려갈 때
-     @objc private func keyboardWillHide(_ notification: Notification) {
-         keyboardResponsiveView?.isHidden = true
-     }
-
-     deinit {
-         NotificationCenter.default.removeObserver(self)
-     }
-    
-    /// 🔹 화면 탭 시 키보드 내리기 공통 기능
-    private func setupDismissKeyboardOnTap() {
-        let tap = UITapGestureRecognizer(
-            target: self,
-            action: #selector(dismissKeyboard)
-        )
-        tap.cancelsTouchesInView = false
-        view.addGestureRecognizer(tap)
-    }
-
-    /// 🔹 키보드 숨기기
-    @objc func dismissKeyboard() {
-        view.endEditing(true)
+    // 불러오기
+    static func load() -> [String] {
+        UserDefaults.standard.stringArray(forKey: key) ?? []
     }
 }
