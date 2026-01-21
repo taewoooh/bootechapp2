@@ -57,30 +57,44 @@ class ViewController: BaseViewController {
         
         // 🔹 오토레이아웃 설정
         NSLayoutConstraint.activate([
-            // 검색바
+
+            // 🔹 검색바 레이아웃
+            // - SafeArea 기준 상단 여백 20
+            // - 좌우 여백 20으로 중앙 정렬
+            // - 고정 높이(50)로 검색 입력 영역 확보
             searchBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
             searchBar.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             searchBar.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             searchBar.heightAnchor.constraint(equalToConstant: 50),
-            
-            // 카드 스크롤
+
+            // 🔹 상단 카드 스크롤 레이아웃
+            // - 검색바 바로 아래 배치
+            // - 화면 전체 폭 사용
+            // - 고정 높이로 버튼/카드 영역 유지
             cardScroll.topAnchor.constraint(equalTo: searchBar.bottomAnchor, constant: 20),
             cardScroll.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             cardScroll.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             cardScroll.heightAnchor.constraint(equalToConstant: Dimens.Height.HeightButton),
-            
-            // 실거래 요약 정보
+
+            // 🔹 실거래 요약 정보 영역
+            // - 카드 스크롤 바로 아래 배치
+            // - 화면 가로 전체 사용
+            // - 고정 높이로 요약 정보 안정적 표시
             infoView.topAnchor.constraint(equalTo: cardScroll.bottomAnchor, constant: 1),
             infoView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             infoView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             infoView.heightAnchor.constraint(equalToConstant: 80),
-            
-            // 최신검색뷰 (검색바 아래에서 전체 화면까지)
+
+            // 🔹 최신검색뷰 레이아웃 (오버레이 영역)
+            // - 검색바 바로 아래부터 시작
+            // - 화면 하단까지 확장
+            // - 검색 중일 때 결과/히스토리를 덮어씌우는 용도
             recentView.topAnchor.constraint(equalTo: searchBar.bottomAnchor, constant: 10),
             recentView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             recentView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             recentView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
+
         
         // 🔹 실거래 요약 정보 예시 데이터 (임시)
         let infoData = TransactionInfoData(
