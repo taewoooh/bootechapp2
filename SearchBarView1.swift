@@ -19,8 +19,18 @@ class SearchBarView1: UIView , UITextFieldDelegate{
         return textField.text ?? ""
     }
     // 🔥 외부에서 검색어 세팅용
+    // - 최신검색 아이템 클릭 시 호출됨
+    // - 프로그램적으로 텍스트를 넣어도
+    // 사용자 입력과 동일하게 처리하기 위함
     func setText(_ text: String) {
     textField.text = text
+
+
+    // 🔥 중요
+    // textField.text를 코드로 바꾸면
+    // editingChanged 이벤트가 자동으로 발생하지 않음
+    // 그래서 수동으로 호출해줘야 함
+    onTextChanged?(text)
     }
     
     // 🔑 키보드가 올라와 있는지 여부

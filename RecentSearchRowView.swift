@@ -58,11 +58,23 @@ final class RecentSearchRowView: UIView {
         ])
     }
 
+    // 🔹 최근검색 아이템(텍스트) 클릭 시 호출되는 메서드
+    // - X 버튼이 아닌 "검색어 텍스트"를 탭했을 때만 실행됨
+    // - RecentSearchView → ViewController 로 선택 이벤트를 전달하기 위한 콜백 트리거
     @objc private func didTapRow() {
+        print("🟢 [RecentSearchRowView] 아이템 텍스트 클릭")
+        
+        // 🔥 선택된 검색어를 외부(View)로 전달
         onTap?()
     }
 
+    // 🔹 최근검색 아이템의 X(삭제) 버튼 클릭 시 호출되는 메서드
+    // - 해당 검색어 하나만 삭제하기 위한 이벤트
+    // - RecentSearchView → ViewController 로 삭제 요청 전달
     @objc private func didTapDelete() {
+        print("🔴 [RecentSearchRowView] X 버튼 클릭")
+        
+        // 🔥 삭제 대상 검색어를 외부(View)로 전달
         onDelete?()
     }
 }
