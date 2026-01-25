@@ -18,7 +18,10 @@ class SearchBarView1: UIView , UITextFieldDelegate{
     var text: String {
         return textField.text ?? ""
     }
-    
+    // 🔥 외부에서 검색어 세팅용
+    func setText(_ text: String) {
+    textField.text = text
+    }
     
     // 🔑 키보드가 올라와 있는지 여부
     var isKeyboardVisible: Bool {

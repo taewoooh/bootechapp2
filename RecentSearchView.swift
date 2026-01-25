@@ -2,7 +2,10 @@ import UIKit
 
 class RecentSearchView: UIView {
     
-
+    // 🔥 외부(ViewController)로 전달
+    var onSelectItem: ((String) -> Void)?
+    var onDeleteItem: ((String) -> Void)?
+    
     private var items: [String] = []
     
     private let titleLabel: UILabel = {
@@ -47,7 +50,7 @@ class RecentSearchView: UIView {
         let st = UIStackView()
         st.axis = .vertical
         st.spacing = 10
-        st.alignment = .leading
+        st.alignment = .fill      // ✅ 이걸로 변경
         st.translatesAutoresizingMaskIntoConstraints = false
         return st
     }()
@@ -100,13 +103,22 @@ class RecentSearchView: UIView {
         
     }
     
-    // 👇 최근검색을 추가하는 함수
-    func addRecentItem(_ text: String) {
-        let lb = UILabel()
-        lb.text = text
-        lb.font = UIFont.systemFont(ofSize: 15)
-        lb.textColor = .darkGray
-        listContainer.addArrangedSubview(lb)
+    private func addRecentItem(_ text: String) {
+
+        let row = RecentSearchRowView(text: text)
+
+        // 🔹 검색어 선택
+        row.onTap = { [weak self] in
+            self?.onSelectItem?(text)
+        }
+
+        // 🔹 X 버튼 삭제
+        row.onDelete = { [weak self] in
+            self?.onDeleteItem?(text)
+        }
+
+        listContainer.addArrangedSubview(row)
     }
+    
 } //  최근검색 페이지 (SearchBar 터치 시 보여지는 레이어)
 

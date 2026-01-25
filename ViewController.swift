@@ -120,6 +120,24 @@ class ViewController: BaseViewController {
         
         // 🔹 검색바 placeholder 설정
         searchBar.setPlaceholder("법정동, 아파트명 검색")
+        
+        recentView.onSelectItem = { [weak self] text in
+            guard let self = self else { return }
+
+            // 1️⃣ 검색바 텍스트 설정
+            self.searchBar.setText(text)
+
+            // 2️⃣ 키보드 내리기
+            self.view.endEditing(true)
+
+            // 3️⃣ 최신검색뷰 숨김
+            self.recentView.isHidden = true
+
+            // 4️⃣ 검색 실행
+            self.performSearch(text)
+        }
+        
+        
     }
     override func currentSearchText() -> String? {
         let text = searchBar.text
@@ -133,7 +151,15 @@ class ViewController: BaseViewController {
         recentView.update(list: list)
     }
 
-    
+    // 🔍 검색 실행 로직
+    func performSearch(_ keyword: String) {
+        print("🔍 검색 실행:", keyword)
+
+        // TODO:
+        // - API 호출
+        // - 필터링
+        // - 결과 화면 갱신
+    }
 
   
 
