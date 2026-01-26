@@ -181,7 +181,7 @@ class SearchBarView1: UIView , UITextFieldDelegate{
         let text = textField.text ?? ""
         clearButton.isHidden = text.isEmpty
         onTextChanged?(text)
-
+        print("🔥 [SearchBarView1] onTextChanged 발생:", text)
         // 🔑 텍스트가 비어있는지 (nil, 공백 포함)
         let isTextEmpty = text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
 
@@ -192,6 +192,8 @@ class SearchBarView1: UIView , UITextFieldDelegate{
             recentSearchView?.isHidden = true
         }
     }
-
+    func showClearButton(_ show: Bool) {
+        clearButton.isHidden = !show
+    }
     
 } //상단 검색 툴바 (법정동,아파

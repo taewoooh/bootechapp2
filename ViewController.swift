@@ -127,6 +127,10 @@ class ViewController: BaseViewController {
             // 1️⃣ 검색바 텍스트 설정
             self.searchBar.setText(text)
 
+            
+            // 🔥 2️⃣ 텍스트 길이 기준으로 X 버튼 제어 (이 줄 추가)
+            self.searchBar.showClearButton(text.count > 0)
+            
             // 2️⃣ 키보드 내리기
             self.view.endEditing(true)
 
