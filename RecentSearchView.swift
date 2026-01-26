@@ -80,7 +80,12 @@ class RecentSearchView: UIView {
 
     
 
-    
+    private let scrollView: UIScrollView = {
+        let sv = UIScrollView()
+        sv.translatesAutoresizingMaskIntoConstraints = false
+        sv.showsVerticalScrollIndicator = true
+        return sv
+    }()
 
 
     private func setupUI() {
@@ -88,7 +93,8 @@ class RecentSearchView: UIView {
         
         addSubview(titleLabel)
         addSubview(deleteAllButton)
-        addSubview(listContainer)
+        addSubview(scrollView)
+        scrollView.addSubview(listContainer)
       
 
    
@@ -96,18 +102,29 @@ class RecentSearchView: UIView {
             // 제목
             titleLabel.topAnchor.constraint(equalTo: topAnchor, constant: 20),
             titleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
-            
+
             // 삭제버튼
             deleteAllButton.centerYAnchor.constraint(equalTo: titleLabel.centerYAnchor),
             deleteAllButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
-            
-            // 리스트 영역
-            listContainer.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 20),
-            listContainer.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
-            listContainer.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16)
-            
+
+            // 🔹 스크롤뷰 영역
+            scrollView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 20),
+            scrollView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: bottomAnchor),
+
+            // 🔹 스택뷰를 스크롤뷰 안에 고정
+            listContainer.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
+            listContainer.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor, constant: 16),
+            listContainer.trailingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor, constant: -16),
+            listContainer.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
+
+            // 🔥 세로 스크롤 고정 (이 줄 매우 중요)
+            listContainer.widthAnchor.constraint(
+                equalTo: scrollView.frameLayoutGuide.widthAnchor,
+                constant: -32
+            )
         ])
-        
         
     }
     
