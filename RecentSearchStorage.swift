@@ -28,4 +28,15 @@ final class RecentSearchStorage {
     static func load() -> [String] {
         UserDefaults.standard.stringArray(forKey: key) ?? []
     }
+    
+    static func delete(_ text: String) {
+        var list = load()
+
+        // 🔥 해당 텍스트만 제거
+        list.removeAll { $0 == text }
+
+        // 다시 저장
+        UserDefaults.standard.set(list, forKey: key)
+    }
+    
 }

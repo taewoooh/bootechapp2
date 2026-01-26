@@ -10,6 +10,22 @@ class RecentSearchView: UIView {
 
     
     @objc private func didTapItem(_ gesture: UITapGestureRecognizer) {
+
+        // 🔥 터치된 위치
+        let location = gesture.location(in: gesture.view)
+
+        // 🔥 X 버튼 영역이면 아이템 선택 무시
+        if let itemView = gesture.view {
+            for subview in itemView.subviews {
+                if let button = subview as? UIButton {
+                    if button.frame.contains(location) {
+                        return   // ⛔️ 여기서 끝 (선택 안 됨)
+                    }
+                }
+            }
+        }
+
+        // 🔹 여기까지 왔으면 "아이템 선택"
         guard let text = gesture.view?.accessibilityLabel else { return }
         onSelectItem?(text)
     }
@@ -126,6 +142,7 @@ class RecentSearchView: UIView {
             )
         ])
         
+        
     }
     
     private func addRecentItem(_ text: String) {
@@ -144,7 +161,7 @@ class RecentSearchView: UIView {
         // 🔹 X 버튼
         let deleteButton = UIButton(type: .system)
 
-
+    
         // 🔥 아이콘 크기 조절
         let config = UIImage.SymbolConfiguration(pointSize: 12, weight: .medium)
         deleteButton.setImage(

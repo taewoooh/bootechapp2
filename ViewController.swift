@@ -36,7 +36,18 @@ class ViewController: BaseViewController {
             view.addSubview($0)
         }
         
-       
+        recentView.onDeleteItem = { [weak self] text in
+            guard let self = self else { return }
+
+            // 1️⃣ 저장된 최신검색에서 해당 아이템 삭제
+            RecentSearchStorage.delete(text)
+
+            // 2️⃣ 최신 리스트 다시 불러오기
+            let updatedList = RecentSearchStorage.load()
+
+            // 3️⃣ 최신검색뷰 다시 그리기
+            self.recentView.update(list: updatedList)
+        }
         // 🔥 검색바 포커스(터치) 시
         searchBar.onBeginEditing = { [weak self] in
             guard let self = self else { return }
