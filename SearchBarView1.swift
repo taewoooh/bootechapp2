@@ -174,6 +174,12 @@ class SearchBarView1: UIView , UITextFieldDelegate{
         let keyboardVisible = textField.isFirstResponder
         
         onTextChanged?("")
+        
+        // 🔥 이 한 줄 추가
+        if keyboardVisible {
+            recentSearchView?.isHidden = false
+        }
+        
         onClearTapped?(keyboardVisible)
     }
     

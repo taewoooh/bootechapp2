@@ -2,6 +2,14 @@ import UIKit
 
 class ViewController: BaseViewController {
     
+    
+    private var pullToRefresh: PullToRefresh!
+        private let collectionView: UICollectionView = {
+            let layout = UICollectionViewFlowLayout()
+            layout.minimumLineSpacing = 12
+            return UICollectionView(frame: .zero, collectionViewLayout: layout)
+        }()
+    
     // 🔹 커스텀 검색바 (SearchBarView1 내부에 UITextField 존재)
     let searchBar = SearchBarView1()
     
@@ -29,12 +37,20 @@ class ViewController: BaseViewController {
         // 🔹 메인 배경색 설정
         view.backgroundColor = AppColors.mainBackground
         
+        collectionView.backgroundColor = .clear
         // 🔹 UI 컴포넌트들을 화면에 추가
         // ⚠️ 추가 순서가 z-index(겹침 순서)에 영향을 줌
-        [searchBar, cardScroll, infoView, recentView].forEach {
+        // 🔹 UI 컴포넌트들을 화면에 추가
+        [searchBar, cardScroll, infoView, collectionView, recentView].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
             view.addSubview($0)
         }
+        
+        // 🔹 PullToRefresh 초기화 (collectionView 세팅 직후)
+        pullToRefresh = PullToRefresh { [weak self] in
+            self?.reloadMainList()
+        }
+        pullToRefresh.attach(to: collectionView)
         
         recentView.onDeleteItem = { [weak self] text in
             guard let self = self else { return }
@@ -106,6 +122,12 @@ class ViewController: BaseViewController {
             infoView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             infoView.heightAnchor.constraint(equalToConstant: 80),
 
+            
+            collectionView.topAnchor.constraint(equalTo: infoView.bottomAnchor),
+            collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            
             // 🔹 최신검색뷰 레이아웃 (오버레이 영역)
             // - 검색바 바로 아래부터 시작
             // - 화면 하단까지 확장
@@ -128,6 +150,13 @@ class ViewController: BaseViewController {
         
         // 🔹 TransactionInfoView에 데이터 주입
         infoView.configure(with: infoData)
+        
+        
+        // 🔹 메인 리스트 추가
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(collectionView)
+
+
         
         // 🔹 검색바 placeholder 설정
         searchBar.setPlaceholder("법정동, 아파트명 검색")
@@ -176,6 +205,24 @@ class ViewController: BaseViewController {
         // - 결과 화면 갱신
     }
 
-  
+    private func reloadMainList() {
+        print("🔄 Pull to Refresh")
+
+        // 🔥 1️⃣ 검색바 텍스트 비우기
+        searchBar.setText("")
+        searchBar.showClearButton(false)
+
+        // 🔥 2️⃣ 키보드 내리기
+        view.endEditing(true)
+
+        // 🔥 3️⃣ 최신검색뷰 비활성화
+        recentView.isHidden = true
+
+        // --- 기존 로직 ---
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+            self.collectionView.reloadData()
+            self.pullToRefresh.endRefreshing()
+        }
+    }
 
 }
