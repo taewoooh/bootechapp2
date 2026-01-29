@@ -144,7 +144,10 @@ class RecentSearchView: UIView {
         
         
     }
-    
+    @objc private func deleteItemTapped(_ sender: UITapGestureRecognizer) {
+        guard let text = sender.view?.accessibilityLabel else { return }
+        onDeleteItem?(text)
+    }
     private func addRecentItem(_ text: String) {
 
         let itemView = UIView()
@@ -172,30 +175,41 @@ class RecentSearchView: UIView {
 
         deleteButton.tintColor = .systemGray
         deleteButton.translatesAutoresizingMaskIntoConstraints = false
-
+        // 🔥 X 버튼 터치 영역 (크게)
+        let deleteHitArea = UIView()
+        deleteHitArea.translatesAutoresizingMaskIntoConstraints = false
+        deleteHitArea.isUserInteractionEnabled = true
         // 🔹 삭제 이벤트
-        deleteButton.addAction(UIAction { [weak self] _ in
-            self?.onDeleteItem?(text)
-        }, for: .touchUpInside)
-
+        deleteHitArea.addGestureRecognizer(
+            UITapGestureRecognizer(target: self, action: #selector(deleteItemTapped(_:)))
+        )
+        deleteHitArea.accessibilityLabel = text
+        
         itemView.addSubview(label)
-        itemView.addSubview(deleteButton)
+        itemView.addSubview(deleteHitArea)
+        deleteHitArea.addSubview(deleteButton)
 
         NSLayoutConstraint.activate([
             // label
             label.leadingAnchor.constraint(equalTo: itemView.leadingAnchor, constant: 16),
             label.centerYAnchor.constraint(equalTo: itemView.centerYAnchor),
 
-            // X 버튼
-            deleteButton.trailingAnchor.constraint(equalTo: itemView.trailingAnchor, constant: -12),
-            deleteButton.centerYAnchor.constraint(equalTo: itemView.centerYAnchor),
-            deleteButton.widthAnchor.constraint(equalToConstant: 24),
-            deleteButton.heightAnchor.constraint(equalToConstant: 24),
+            // 🔥 deleteHitArea (터치 영역 크게)
+            deleteHitArea.trailingAnchor.constraint(equalTo: itemView.trailingAnchor, constant: -4),
+            deleteHitArea.centerYAnchor.constraint(equalTo: itemView.centerYAnchor),
+            deleteHitArea.widthAnchor.constraint(equalToConstant: 44),
+            deleteHitArea.heightAnchor.constraint(equalToConstant: 44),
 
-            // label이 X 버튼을 침범하지 않게
-            label.trailingAnchor.constraint(lessThanOrEqualTo: deleteButton.leadingAnchor, constant: -12),
+            // 🔥 실제 X 아이콘은 가운데
+            deleteButton.centerXAnchor.constraint(equalTo: deleteHitArea.centerXAnchor),
+            deleteButton.centerYAnchor.constraint(equalTo: deleteHitArea.centerYAnchor),
+            deleteButton.widthAnchor.constraint(equalToConstant: 12),
+            deleteButton.heightAnchor.constraint(equalToConstant: 12),
 
-            // 터치 영역 최소 확보
+            // label이 X 영역 침범 안 하게
+            label.trailingAnchor.constraint(lessThanOrEqualTo: deleteHitArea.leadingAnchor, constant: -12),
+
+            // 행 높이
             itemView.heightAnchor.constraint(greaterThanOrEqualToConstant: 44)
         ])
 
